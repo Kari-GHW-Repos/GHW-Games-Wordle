@@ -7,15 +7,23 @@
 
 import SwiftUI
 
+var numGamesWon = 0
 struct ContentView: View {
     var body: some View {
         VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.blue)
-            Text("Hello, world!")
+            Text("GHW Games: Infinite Wordle!")
+                .fontWeight(.bold)
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+            Text("Your Games Won: \(numGamesWon)")
+                .foregroundColor(.white)
+            Button("Play Now") {
+                //open companion app
+            }
+            .padding(.all, 5)
+            .foregroundColor(.white)
+            .cornerRadius(5)
         }
-        .padding()
     }
 }
 

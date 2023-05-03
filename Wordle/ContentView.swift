@@ -16,11 +16,13 @@ var randomLetter3 = String(randomWord[randomWord.index(randomWord.startIndex, of
 var randomLetter4 = String(randomWord[randomWord.index(randomWord.startIndex, offsetBy: 3)])
 var randomLetter5 = String(randomWord[randomWord.index(randomWord.startIndex, offsetBy: 4)])
 
+//TODO: Add a working keyboard on the bottom of the screen OR display what letters have already been used
+//TODO: Add a button to connect the watch app back to the phone app (Watch sessions)
+//TODO: Reset the new word only once a day, and not upon app launch (Core Data – store new word at 12am GMT OR add a server that determines the new word)
+//TODO: Use a word API over a hard-coded word array
+//TODO: Happy GHW Games!!
 
 struct ContentView: View {
-    //TODO: Add auto-tabbing between words
-    //TODO: Change word at 12am GMT every day
-    //TODO: Make stats page for Apple Watch <3 
     //WORD 1
     @State var letter1 = ""
     @State var letter2 = ""
@@ -76,7 +78,6 @@ struct ContentView: View {
     @State var correctLetter5 = randomLetter5
     
     @State var gameWon = false
-    //TODO: Move from one letter in the row to the next once finished typing
     @FocusState var focusedField: Int?
 
     var body: some View {
@@ -135,13 +136,24 @@ struct Word : View{
     @Binding var correctLetter5 : String
     @Binding var word1Submitted : Bool
     @Binding var gameWon: Bool
+    
+    @FocusState private var focusedField: Field?
+    enum Field: Int, Hashable {
+       case letter1
+       case letter2
+       case letter3
+       case letter4
+       case letter5
+    }
     var body: some View {
         if !gameWon {
             HStack{
                 TextField("", text: $letter1)
                     .frame(width: 58, height: 58)
                     .onReceive(letter1.publisher.collect()) { self.letter1 = String($0.prefix(1))
+                        self.focusNextField($focusedField)
                     }
+                    .focused($focusedField, equals: .letter1)
                     .multilineTextAlignment(.center)
                     .font(.title)
                     .foregroundColor(.white)
@@ -160,8 +172,11 @@ struct Word : View{
                     .padding(.all, 2).background(.gray)
                 TextField("", text: $letter2)
                     .frame(width: 58, height: 58)
-                    .onReceive(letter2.publisher.collect()) { self.letter2 = String($0.prefix(1))
+                    .onReceive(letter2.publisher.collect()) {
+                        self.letter2 = String($0.prefix(1))
+                        self.focusNextField($focusedField)
                     }
+                    .focused($focusedField, equals: .letter2)
                     .multilineTextAlignment(.center)
                     .font(.title)
                     .foregroundColor(.white)
@@ -181,7 +196,9 @@ struct Word : View{
                 TextField("", text: $letter3)
                     .frame(width: 58, height: 58)
                     .onReceive(letter3.publisher.collect()) { self.letter3 = String($0.prefix(1))
+                        self.focusNextField($focusedField)
                     }
+                    .focused($focusedField, equals: .letter3)
                     .multilineTextAlignment(.center)
                     .font(.title)
                     .foregroundColor(.white)
@@ -201,7 +218,9 @@ struct Word : View{
                 TextField("", text: $letter4)
                     .frame(width: 58, height: 58)
                     .onReceive(letter4.publisher.collect()) { self.letter4 = String($0.prefix(1))
+                        self.focusNextField($focusedField)
                     }
+                    .focused($focusedField, equals: .letter4)
                     .multilineTextAlignment(.center)
                     .font(.title)
                     .foregroundColor(.white)
@@ -222,6 +241,7 @@ struct Word : View{
                     .frame(width: 58, height: 58)
                     .onReceive(letter5.publisher.collect()) { self.letter5 = String($0.prefix(1))
                     }
+                    .focused($focusedField, equals: .letter5)
                     .multilineTextAlignment(.center)
                     .font(.title)
                     .foregroundColor(.white)
@@ -281,6 +301,13 @@ struct Word : View{
     func determineValidity(word: String) -> Bool{
         let newWord = word.capitalized(with: Locale.current)
         return words.contains(newWord)
+    }
+    func focusNextField<F: RawRepresentable>(_ field: FocusState<F?>.Binding) where F.RawValue == Int {
+        guard let currentValue = field.wrappedValue else { return }
+        let nextValue = currentValue.rawValue + 1
+        if let newValue = F.init(rawValue: nextValue) {
+            field.wrappedValue = newValue
+        }
     }
 }
 struct ContentView_Previews: PreviewProvider {
